@@ -1,0 +1,31 @@
+# Node dependencies
+node_modules/
+
+# Portable Git / temporary downloads
+PortableGit/
+PortableGit-*.7z.exe
+
+# Build outputs
+dist/
+
+# Local env files
+.env
+.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite cache
+.vite/
+
+# Editor directories and files
+.DS_Store
+.idea/
+.vscode/
+
+# Lock files
+pnpm-lock.yaml
+yarn.lock
