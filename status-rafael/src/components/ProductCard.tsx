@@ -3,6 +3,7 @@ import { ChevronRight, Server } from 'lucide-react';
 
 import type { Product } from '../types/index.js';
 import { statusService } from '../services/status.service.js';
+import { getStatusAccentBorder, getStatusIconBg } from '../utils/statusColors.js';
 import { StatusBadge } from './StatusBadge';
 
 interface ProductCardProps {
@@ -13,26 +14,35 @@ export function ProductCard({ product }: ProductCardProps) {
   const status = statusService.getCurrentProductStatus(product.id);
 
   return (
-    <Link to={`/products/${product.id}`} className="group">
-      <div className="product-card surface-card p-6 border-2 border-blue-200 hover:border-cyan-400 hover:shadow-cyan-400/20">
-        <div className="mb-5 flex items-center justify-between gap-4">
+    <Link to={`/products/${product.id}`} className="group block focus-ring rounded-3xl">
+      <div
+        className={`product-card border-l-4 ${getStatusAccentBorder(status)} overflow-hidden`}
+      >
+        <div className="mb-5 flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-100 to-cyan-100 text-blue-600 shadow-md">
+            <div
+              className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-sm ${getStatusIconBg(status)}`}
+            >
               <Server size={20} />
             </div>
             <div>
-              <h3 className="font-bold text-gray-900 text-lg">{product.name}</h3>
-              <p className="text-sm text-blue-600 font-medium mt-0.5">{product.type}</p>
+              <h3 className="text-lg font-bold text-slate-900 group-hover:text-brand transition-colors">
+                {product.name}
+              </h3>
+              <p className="mt-0.5 text-sm font-medium text-brand/70">{product.type}</p>
             </div>
           </div>
           <StatusBadge condition={status} size="sm" />
         </div>
 
-        <p className="text-gray-700 text-sm leading-relaxed mb-6 font-medium">{product.description}</p>
+        <p className="mb-6 text-sm leading-relaxed text-slate-600">{product.description}</p>
 
-        <div className="flex items-center justify-between text-xs font-semibold text-blue-600 pt-4 border-t border-blue-100">
-          <span>👤 {product.owner}</span>
-          <ChevronRight size={16} className="text-cyan-500 transition group-hover:translate-x-1" />
+        <div className="flex items-center justify-between border-t border-brand/10 pt-4 text-xs font-semibold text-brand/80">
+          <span>{product.owner}</span>
+          <ChevronRight
+            size={16}
+            className="text-accent transition group-hover:translate-x-1"
+          />
         </div>
       </div>
     </Link>

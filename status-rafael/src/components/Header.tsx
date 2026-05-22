@@ -1,8 +1,11 @@
 ﻿import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Hospital, Search, Phone, Mail } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Hospital, Search, Phone, Mail, Shield } from 'lucide-react';
 
 import { authService } from '../services/auth.service.js';
+import { statusService } from '../services/status.service.js';
+import { EventCondition } from '../types/index.js';
+import { Button } from './ui/Button';
 
 interface HeaderProps {
   isAdmin?: boolean;
@@ -11,106 +14,131 @@ interface HeaderProps {
 export function Header({ isAdmin = false }: HeaderProps) {
   const [search, setSearch] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+  const globalStatus = statusService.getGlobalStatus();
+  const isHealthy = globalStatus === EventCondition.CONDITION_ACTIVE;
 
   const handleLogout = () => {
     authService.logout();
     navigate('/');
   };
 
+  const navLinkClass = (path: string, isHash = false) => {
+    const active = !isHash && location.pathname === path;
+    return `rounded-full px-4 py-2 font-medium transition focus-ring ${
+      active
+        ? 'bg-white text-brand shadow-md'
+        : 'text-brand/90 hover:bg-white/80 hover:text-brand hover:shadow-sm'
+    }`;
+  };
+
   return (
-    <header className="sticky top-0 z-30 shadow-lg shadow-blue-900/10">
-      {/* Top Bar - Contact & Language */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-11 flex items-center justify-between text-xs font-medium">
+    <header className="sticky top-0 z-30 shadow-lg shadow-brand/10">
+      <div className="bg-gradient-to-r from-brand-dark via-brand to-brand-dark text-white">
+        <div className="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 text-xs font-medium sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
-              <Phone size={14} />
+              <Phone size={13} />
               <span>+57 8 2345678</span>
             </div>
-            <div className="h-4 w-px bg-blue-400"></div>
-            <div className="flex items-center gap-1.5">
-              <Mail size={14} />
+            <div className="hidden h-4 w-px bg-white/30 sm:block" />
+            <div className="hidden items-center gap-1.5 sm:flex">
+              <Mail size={13} />
               <span>info@sanrafael.gov.co</span>
             </div>
           </div>
-          <select className="rounded-lg border border-blue-400 bg-blue-800/50 px-2 py-0.5 text-xs text-white outline-none">
-            <option>Español</option>
-            <option>English</option>
+          <select
+            className="rounded-lg border border-white/30 bg-white/10 px-2 py-0.5 text-xs outline-none"
+            aria-label="Idioma"
+            defaultValue="es"
+          >
+            <option value="es">Español</option>
+            <option value="en">English</option>
           </select>
         </div>
       </div>
 
-      {/* Main Header */}
-      <div className="bg-gradient-to-r from-white via-blue-50/30 to-white border-b border-blue-100 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            {/* Logo Section */}
-            <Link to="/" className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white shadow-lg shadow-blue-600/40">
-                <Hospital size={32} />
+      <div className="glass-panel border-b border-brand/10">
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <Link to="/" className="group flex items-center gap-4 focus-ring rounded-2xl">
+              <div className="relative">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-dark text-white shadow-lg shadow-brand/30">
+                  <Hospital size={28} />
+                </div>
+                {isHealthy && (
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-status-active opacity-60" />
+                    <span className="relative inline-flex h-4 w-4 rounded-full border-2 border-white bg-status-active" />
+                  </span>
+                )}
               </div>
               <div>
-                <p className="text-lg font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-cyan-600 bg-clip-text text-transparent">Hospital San Rafael</p>
-                <p className="text-xs uppercase tracking-[0.3em] text-blue-600 font-semibold">Monitoreo Avanzado</p>
+                <p className="font-display text-lg font-bold text-gradient-brand">Hospital San Rafael</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-brand/70">
+                  Monitoreo operativo
+                </p>
               </div>
-              {/* Logo placeholder - USTA */}
-              <div className="hidden lg:flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 border-2 border-amber-300 shadow-md ml-4">
-                <span className="text-xs text-center text-amber-800 font-bold px-1">USTA</span>
+              <div className="ml-2 hidden rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 px-3 py-2 lg:block">
+                <span className="text-xs font-bold text-amber-800">USTA</span>
               </div>
             </Link>
 
-            {/* Search Bar */}
-            <div className="relative flex-1 max-w-2xl lg:mx-8">
-              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400" />
+            <div className="relative max-w-xl flex-1 lg:mx-6">
+              <Search
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-brand/50"
+              />
               <input
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Buscar servicios, alertas..."
-                className="w-full rounded-full border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 py-3 pl-12 pr-4 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-300/30 shadow-sm"
+                className="input-field rounded-full py-2.5 pl-11 pr-4 text-sm"
+                aria-label="Buscar servicios"
               />
             </div>
 
-            {/* Auth Section */}
             <div className="flex items-center justify-end gap-3">
               {!isAdmin ? (
-                <Link
-                  to="/login"
-                  className="rounded-full bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/40 hover:shadow-blue-600/60 transition-all hover:-translate-y-0.5"
-                >
-                  Ingresar
+                <Link to="/login">
+                  <Button variant="primary" className="!py-2.5 !text-sm">
+                    Ingresar
+                  </Button>
                 </Link>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="rounded-full bg-gradient-to-r from-red-600 to-red-700 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-600/40 hover:shadow-red-600/60 transition-all hover:-translate-y-0.5"
-                >
+                <Button variant="danger" onClick={handleLogout} className="!py-2.5 !text-sm">
                   Cerrar sesión
-                </button>
+                </Button>
               )}
             </div>
           </div>
         </div>
 
-        {/* Navigation Bar */}
-        <nav className="bg-gradient-to-r from-blue-50 to-cyan-50 border-t border-blue-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center gap-2 text-sm">
-            <Link to="/" className="rounded-full px-4 py-2 font-medium text-blue-900 transition hover:bg-white hover:text-blue-600 hover:shadow-md">
+        <nav className="border-t border-brand/10 bg-gradient-to-r from-brand-soft/50 to-accent-soft/30">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 py-3 text-sm sm:px-6 lg:px-8">
+            <Link to="/" className={navLinkClass('/')}>
               Inicio
             </Link>
-            <Link to="/admin" className="rounded-full px-4 py-2 font-medium text-blue-700 transition hover:bg-white hover:text-blue-600 hover:shadow-md">
-              Panel Admin
-            </Link>
-            <a href="#servicios" className="rounded-full px-4 py-2 font-medium text-blue-700 transition hover:bg-white hover:text-blue-600 hover:shadow-md">
+            <a href="#servicios" className={navLinkClass('', true)}>
               Servicios
             </a>
-            <a href="#estado" className="rounded-full px-4 py-2 font-medium text-blue-700 transition hover:bg-white hover:text-blue-600 hover:shadow-md">
+            <a href="#estado" className={navLinkClass('', true)}>
               Estado General
             </a>
-            <a href="#contacto" className="rounded-full px-4 py-2 font-medium text-blue-700 transition hover:bg-white hover:text-blue-600 hover:shadow-md">
+            <a href="#informacion" className={navLinkClass('', true)}>
+              Información
+            </a>
+            <a href="#contacto" className={navLinkClass('', true)}>
               Contacto
             </a>
+            <Link
+              to="/admin"
+              className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-white/60 px-4 py-2 font-medium text-brand transition hover:bg-white hover:shadow-sm focus-ring"
+            >
+              <Shield size={14} />
+              Panel Admin
+            </Link>
           </div>
         </nav>
       </div>

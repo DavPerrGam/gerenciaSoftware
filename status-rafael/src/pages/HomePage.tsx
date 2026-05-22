@@ -1,31 +1,52 @@
-﻿import { useMemo } from "react";
+﻿import { useMemo, useState } from 'react';
+import { CheckCircle2, AlertTriangle, XCircle, Phone, Shield, Clock } from 'lucide-react';
 
-import { Header } from "../components/Header";
-import { GlobalStatus } from "../components/GlobalStatus";
-import { ProductCard } from "../components/ProductCard";
-import { storageService } from "../services/storage.service.js";
-import { statusService } from "../services/status.service.js";
-import { EventCondition } from "../types/index.js";
+import { PageLayout } from '../components/PageLayout';
+import { GlobalStatus } from '../components/GlobalStatus';
+import { ProductCard } from '../components/ProductCard';
+import { MetricCard } from '../components/ui/MetricCard';
+import { SectionHeader } from '../components/ui/SectionHeader';
+import { Card } from '../components/ui/Card';
+import { storageService } from '../services/storage.service.js';
+import { statusService } from '../services/status.service.js';
+import { EventCondition } from '../types/index.js';
 
 const dashboardMetrics = [
   {
-    label: "Servicios activos",
+    label: 'Servicios activos',
     key: EventCondition.CONDITION_ACTIVE,
-    accent: "text-emerald-700",
+    accentClass: 'text-status-active',
+    iconBgClass: 'bg-emerald-50 text-status-active',
+    icon: CheckCircle2,
+    delayClass: 'animate-delay-100',
   },
   {
-    label: "Alertas recientes",
+    label: 'Alertas recientes',
     key: EventCondition.CONDITION_WARNING,
-    accent: "text-amber-600",
+    accentClass: 'text-status-warning',
+    iconBgClass: 'bg-amber-50 text-status-warning',
+    icon: AlertTriangle,
+    delayClass: 'animate-delay-200',
   },
   {
-    label: "Incidencias críticas",
+    label: 'Incidencias críticas',
     key: EventCondition.CONDITION_ERROR,
-    accent: "text-rose-600",
+    accentClass: 'text-status-error',
+    iconBgClass: 'bg-red-50 text-status-error',
+    icon: XCircle,
+    delayClass: 'animate-delay-300',
   },
 ];
 
+const filterTabs = [
+  { id: 'all', label: 'Todos' },
+  { id: 'active', label: 'Operativos' },
+  { id: 'warning', label: 'Alertas' },
+  { id: 'error', label: 'Críticos' },
+] as const;
+
 export function HomePage() {
+  const [activeTab, setActiveTab] = useState<(typeof filterTabs)[number]['id']>('all');
   const products = useMemo(() => storageService.getProducts(), []);
   const lastUpdate = useMemo(() => new Date(), []);
 
@@ -33,124 +54,131 @@ export function HomePage() {
     () =>
       dashboardMetrics.map((metric) => ({
         ...metric,
-        value: products.filter((product) => statusService.getCurrentProductStatus(product.id) === metric.key).length,
+        value: products.filter(
+          (product) => statusService.getCurrentProductStatus(product.id) === metric.key
+        ).length,
       })),
     [products]
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-cyan-50 flex flex-col">
-      <Header />
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <section className="grid gap-8 lg:grid-cols-[1.6fr_1fr] items-start mb-12">
-          <div className="surface-card p-10 border-l-4 border-blue-600">
-            <div className="mb-6 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-blue-50 to-cyan-50 px-4 py-2 text-sm font-semibold text-blue-700 border border-blue-200 shadow-sm">
-              <span className="h-2.5 w-2.5 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 animate-pulse" />
+    <PageLayout>
+      <section className="hero-pattern relative mb-12 overflow-hidden rounded-3xl border border-brand/10 bg-gradient-to-br from-white via-brand-soft/30 to-accent-soft/20 p-8 sm:p-12">
+        <div className="relative z-10 grid gap-10 lg:grid-cols-[1.4fr_1fr] lg:items-start">
+          <div className="opacity-0 animate-fade-in" style={{ animationFillMode: 'forwards' }}>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-status-active/30 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">
+              <span className="h-2 w-2 rounded-full bg-status-active animate-pulse-soft" />
               Estado operativo en tiempo real
             </div>
-            <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-cyan-600 bg-clip-text text-transparent leading-tight">Monitorea la disponibilidad hospitalaria con precisión.</h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-700">Un centro de control diseñado para Hospital San Rafael, con métricas accionables, alertas jerarquizadas y acceso inmediato a cada servicio crítico.</p>
+            <h1 className="font-display text-4xl font-extrabold leading-tight text-gradient-brand sm:text-5xl">
+              Estado operativo del Hospital San Rafael
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+              Centro de control institucional para la disponibilidad de sistemas tecnológicos
+              críticos: métricas accionables, alertas jerarquizadas y acceso inmediato a cada
+              servicio.
+            </p>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-3">
               {metrics.map((metric) => (
-                <div key={metric.label} className="rounded-3xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 p-6 shadow-md hover:shadow-lg hover:border-cyan-400 transition-all">
-                  <p className="text-sm uppercase tracking-[0.25em] font-semibold text-blue-600">{metric.label}</p>
-                  <p className={`mt-4 text-3xl font-bold ${metric.accent}`}>{metric.value}</p>
-                </div>
+                <MetricCard
+                  key={metric.label}
+                  label={metric.label}
+                  value={metric.value}
+                  icon={metric.icon}
+                  accentClass={metric.accentClass}
+                  iconBgClass={metric.iconBgClass}
+                  delayClass={metric.delayClass}
+                />
               ))}
             </div>
           </div>
 
-          <div className="space-y-5">
-            <div className="surface-card p-8 border-l-4 border-cyan-500 text-center">
-              <p className="text-sm uppercase tracking-[0.35em] text-cyan-600 font-bold mb-4">Icono de medicina</p>
-              <div className="rounded-3xl bg-gradient-to-br from-green-50 to-emerald-50 p-8 border-2 border-green-300 flex items-center justify-center">
-                <span className="text-5xl">⚕️</span>
-              </div>
-              <p className="mt-4 text-xs text-gray-600">Representación de servicios médicos</p>
-            </div>
-
-            <div className="surface-card-strong p-8 border-l-4 border-blue-600">
-              <p className="text-sm uppercase tracking-[0.35em] text-blue-600 font-bold mb-3">Estado general</p>
-              <p className="text-xl font-bold bg-gradient-to-r from-blue-700 to-cyan-600 bg-clip-text text-transparent">Sistema Operativo</p>
-              <p className="mt-3 text-sm text-gray-600">Todos los servicios funcionan dentro de parámetros normales</p>
-              <div className="mt-5 rounded-full h-2 bg-gray-200 overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full" style={{width: "95%"}}></div>
-              </div>
-              <p className="mt-2 text-xs font-semibold text-green-700">Disponibilidad: 95%</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-12" id="servicios">
-          <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-900 to-cyan-600 bg-clip-text text-transparent">Servicios monitorizados</h2>
-              <p className="text-sm text-blue-600 font-medium mt-2">Accede a cada unidad y observa su condición en tiempo real.</p>
-            </div>
-            <div className="rounded-2xl bg-gradient-to-r from-blue-100 to-cyan-100 px-4 py-2 text-sm font-semibold text-blue-800 shadow-md">
-              ⏱ {lastUpdate.toLocaleTimeString("es-CO")}
-            </div>
-          </div>
-
-          {products.length === 0 ? (
-            <div className="surface-card p-8 text-center text-gray-600">
-              <p>No hay servicios registrados aún.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
-        </section>
-
-        <section className="mt-16" id="informacion">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-900 to-cyan-600 bg-clip-text text-transparent">Información clave</h2>
-            <p className="text-sm text-blue-600 font-medium mt-2">Dónde consultar disponibilidad, alertas y canales de atención.</p>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="surface-card p-8 border-l-4 border-blue-600">
-              <p className="text-sm uppercase tracking-[0.3em] font-bold text-blue-600">Canales de atención</p>
-              <p className="mt-4 text-base font-medium text-gray-700">Línea administrativa, correo institucional y atención prioritaria para emergencias operativas.</p>
-            </div>
-            <div className="surface-card p-8 border-l-4 border-cyan-500">
-              <p className="text-sm uppercase tracking-[0.3em] font-bold text-cyan-600">Acceso seguro</p>
-              <p className="mt-4 text-base font-medium text-gray-700">Solo personal autorizado accede al panel administrativo y reportes detallados.</p>
-            </div>
-            <div className="surface-card p-8 border-l-4 border-green-500">
-              <p className="text-sm uppercase tracking-[0.3em] font-bold text-green-600">Política de servicio</p>
-              <p className="mt-4 text-base font-medium text-gray-700">Monitoreo continuo y escalación automática de incidentes críticos.</p>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="mt-16 py-10 bg-gradient-to-r from-blue-900 to-blue-800 text-white" id="contacto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 md:grid-cols-3 mb-8">
-            <div>
-              <h3 className="font-bold mb-3">Ubicación</h3>
-              <p className="text-sm text-blue-100">Calle 6 # 11-50, Tunja, Boyacá</p>
-            </div>
-            <div>
-              <h3 className="font-bold mb-3">Contacto</h3>
-              <p className="text-sm text-blue-100">Tel: +57 8 2345678</p>
-              <p className="text-sm text-blue-100">Email: info@sanrafael.gov.co</p>
-            </div>
-            <div>
-              <h3 className="font-bold mb-3">Horarios</h3>
-              <p className="text-sm text-blue-100">Lunes - Viernes: 8:00 - 18:00</p>
-              <p className="text-sm text-blue-100">Emergencias: 24/7</p>
-            </div>
-          </div>
-          <div className="border-t border-blue-700 pt-8 text-center text-sm text-blue-100">
-            <p>© 2026 Hospital Universitario San Rafael de Tunja. Todos los derechos reservados.</p>
+          <div className="opacity-0 animate-slide-up animate-delay-200" style={{ animationFillMode: 'forwards' }}>
+            <GlobalStatus />
           </div>
         </div>
-      </footer>
-    </div>
+      </section>
+
+      <section id="servicios">
+        <SectionHeader
+          title="Servicios monitorizados"
+          subtitle="Accede a cada unidad y observa su condición en tiempo real."
+          badge={
+            <div className="rounded-2xl border border-brand/15 bg-brand-soft px-4 py-2 text-sm font-semibold text-brand shadow-sm">
+              Actualizado: {lastUpdate.toLocaleTimeString('es-CO')}
+            </div>
+          }
+        />
+
+        <div className="mb-6 flex flex-wrap gap-2" role="tablist" aria-label="Filtros visuales de servicios">
+          {filterTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition focus-ring ${
+                activeTab === tab.id
+                  ? 'bg-brand text-white shadow-md shadow-brand/25'
+                  : 'border border-brand/20 bg-white/80 text-brand hover:bg-brand-soft'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {products.length === 0 ? (
+          <Card className="p-10 text-center text-muted">No hay servicios registrados aún.</Card>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mt-16" id="informacion">
+        <SectionHeader
+          title="Información clave"
+          subtitle="Dónde consultar disponibilidad, alertas y canales de atención."
+        />
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card accent="brand" className="p-8">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-soft text-brand">
+              <Phone size={22} />
+            </div>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-brand">Canales de atención</p>
+            <p className="mt-4 text-base leading-relaxed text-slate-600">
+              Línea administrativa, correo institucional y atención prioritaria para emergencias
+              operativas.
+            </p>
+          </Card>
+          <Card accent="accent" className="p-8">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-accent-soft text-accent">
+              <Shield size={22} />
+            </div>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-accent">Acceso seguro</p>
+            <p className="mt-4 text-base leading-relaxed text-slate-600">
+              Solo personal autorizado accede al panel administrativo y reportes detallados.
+            </p>
+          </Card>
+          <Card accent="success" className="p-8">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-status-active">
+              <Clock size={22} />
+            </div>
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-status-active">
+              Política de servicio
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-slate-600">
+              Monitoreo continuo y escalación automática de incidentes críticos.
+            </p>
+          </Card>
+        </div>
+      </section>
+    </PageLayout>
   );
 }

@@ -22,149 +22,147 @@
   --info: #6c5ce7;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background:
+      radial-gradient(circle at 0% -10%, rgba(0, 82, 163, 0.1) 0%, transparent 35%),
+      radial-gradient(circle at 100% 50%, rgba(74, 144, 226, 0.08) 0%, transparent 40%),
+      linear-gradient(135deg, #f0f7fc 0%, #e8f3ff 50%, #e0f0ff 100%);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  body ::selection {
+    background: rgba(15, 78, 150, 0.18);
+  }
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
+@layer components {
+  .surface-card {
+    @apply rounded-3xl border border-[var(--border)] bg-white shadow-brand;
+    background: linear-gradient(135deg, var(--surface) 0%, #fafbfc 100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .surface-card-strong {
+    @apply rounded-3xl border border-brand/15 bg-brand-soft/40 shadow-brand;
+  }
+
+  .product-card {
+    @apply rounded-3xl border border-brand/15 bg-white p-6 transition-all duration-300;
+    background: linear-gradient(135deg, var(--surface) 0%, #fafbfc 100%);
+  }
+
+  .product-card:hover {
+    @apply -translate-y-1.5 border-accent shadow-brand-lg;
+    background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  }
+
+  .input-field {
+    @apply w-full rounded-2xl border-2 border-[var(--border)] bg-gradient-to-br from-slate-50 to-brand-soft/30 px-4 py-3 outline-none transition;
+  }
+
+  .input-field:focus {
+    @apply border-brand ring-2 ring-brand/20;
+  }
+
+  .button-primary {
+    @apply rounded-2xl bg-gradient-to-br from-brand to-brand-dark px-6 py-3 font-bold text-white shadow-lg shadow-brand/25 transition hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50 disabled:hover:translate-y-0;
+  }
+
+  .button-secondary {
+    @apply rounded-2xl bg-brand/10 px-6 py-3 font-semibold text-brand-dark transition hover:bg-brand/15;
+  }
+
+  .hero-pattern {
+    background-image:
+      linear-gradient(rgba(0, 82, 163, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 82, 163, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  .text-gradient-brand {
+    @apply bg-gradient-to-r from-brand-dark via-brand to-accent bg-clip-text text-transparent;
+  }
 }
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: radial-gradient(circle at 0% -10%, rgba(0, 82, 163, 0.1) 0%, transparent 35%), radial-gradient(circle at 100% 50%, rgba(74, 144, 226, 0.08) 0%, transparent 40%), linear-gradient(135deg, #f0f7fc 0%, #e8f3ff 50%, #e0f0ff 100%);
-  background-attachment: fixed;
-  color: var(--text);
-  min-height: 100vh;
-}
+@layer utilities {
+  .glass-panel {
+    @apply border border-white/60 bg-white/70 backdrop-blur-xl;
+  }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  padding: 0.15rem 0.35rem;
-  border-radius: 0.35rem;
-  background: rgba(15, 23, 42, 0.05);
-}
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
 
-body ::selection {
-  background: rgba(15, 78, 150, 0.18);
-}
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
 
-.surface-card {
-  background: linear-gradient(135deg, var(--surface) 0%, #fafbfc 100%);
-  border: 1px solid var(--border);
-  border-radius: 1.75rem;
-  box-shadow: 0 20px 60px rgba(0, 82, 163, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+  .focus-ring:focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-brand/40;
+  }
 
-.surface-card-strong {
-  background: var(--surface-soft);
-  border: 1px solid rgba(15, 78, 150, 0.14);
-  border-radius: 1.75rem;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
-}
+  .timeline-marker {
+    background: linear-gradient(180deg, #0f4e96 0%, #2b6cb0 100%);
+  }
 
-.product-card {
-  background: linear-gradient(135deg, var(--surface) 0%, #fafbfc 100%);
-  border: 1px solid rgba(0, 82, 163, 0.12);
-  border-radius: 1.75rem;
-  padding: 1.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+  .text-muted {
+    color: var(--muted);
+  }
 
-.product-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  border-color: var(--accent);
-  box-shadow: 0 30px 80px rgba(0, 180, 216, 0.15), 0 0 40px rgba(74, 144, 226, 0.1);
-  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
-}
+  .text-brand {
+    color: var(--brand);
+  }
 
-.panel-card {
-  background: var(--surface);
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  border-radius: 1.75rem;
-  padding: 1.5rem;
-}
+  .border-brand {
+    border-color: var(--brand);
+  }
 
-.input-field {
-  width: 100%;
-  border-radius: 1.25rem;
-  border: 2px solid #d1e4f4;
-  background: linear-gradient(135deg, #f8fafc 0%, #f0f7fc 100%);
-  padding: 1rem 1.1rem;
-  transition: all 0.3s ease;
-}
+  .bg-brand-soft {
+    background-color: var(--brand-soft);
+  }
 
-.input-field:focus {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(0, 82, 163, 0.1);
-}
+  .shadow-brand {
+    box-shadow: 0 20px 40px rgba(15, 78, 150, 0.12);
+  }
 
-.button-primary {
-  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
-  color: white;
-  border-radius: 1.5rem;
-  padding: 0.95rem 1.5rem;
-  font-weight: 700;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 30px rgba(0, 82, 163, 0.2);
-  border: none;
-}
+  .status-accent-active {
+    @apply border-l-status-active;
+  }
 
-.button-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 40px rgba(0, 82, 163, 0.3);
-}
+  .status-accent-warning {
+    @apply border-l-status-warning;
+  }
 
-.button-secondary {
-  background-color: rgba(15, 78, 150, 0.08);
-  color: var(--brand-dark);
-  border-radius: 1.5rem;
-  padding: 0.95rem 1.5rem;
+  .status-accent-error {
+    @apply border-l-status-error;
+  }
 }
-
-.focus-ring:focus-visible {
-  outline: 3px solid rgba(15, 78, 150, 0.24);
-  outline-offset: 3px;
-}
-
-.timeline-marker {
-  background: linear-gradient(180deg, #0f4e96 0%, #2b6cb0 100%);
-}
-
-.text-muted {
-  color: var(--muted);
-}
-
-.text-brand {
-  color: var(--brand);
-}
-
-.border-brand {
-  border-color: var(--brand);
-}
-
-.bg-brand-soft {
-  background-color: var(--brand-soft);
-}
-
-.shadow-brand {
-  box-shadow: 0 20px 40px rgba(15, 78, 150, 0.12);
-}
-
