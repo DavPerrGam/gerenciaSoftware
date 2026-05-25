@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { useHashScroll } from '../hooks/useHashScroll';
 import { Header } from './Header';
 import { Footer } from './Footer';
 
@@ -16,6 +17,8 @@ export function PageLayout({
   showFooter = true,
   mainClassName = '',
 }: PageLayoutProps) {
+  useHashScroll();
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header isAdmin={isAdmin} />

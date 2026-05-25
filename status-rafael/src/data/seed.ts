@@ -1,7 +1,13 @@
 import type { Product } from '../types/index.js';
 import { EventCondition } from '../types/index.js';
-import { storageService } from '../services/storage.service.js';
+import { storageService, notifyStorageUpdate } from '../services/storage.service.js';
 import { v4 as uuidv4 } from 'uuid';
+
+const STORAGE_KEYS = {
+  PRODUCTS: 'sr_products',
+  REPORTS: 'sr_reports',
+  EVENTS: 'sr_events',
+};
 
 const INITIAL_PRODUCTS: Product[] = [
   { id: uuidv4(), name: 'Sistema de Historia Clínica Electrónica', description: 'Gestión de historias clínicas electrónicas de pacientes', type: 'Sistema', owner: 'TI Clínica', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -28,46 +34,68 @@ const INITIAL_PRODUCTS: Product[] = [
   { id: uuidv4(), name: 'Servicio de Backups Hospitalarios', description: 'Servicio de respaldo y recuperación de datos', type: 'Servicio', owner: 'TI Infraestructura', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
-export const seedDatabase = () => {
-  const existingProducts = storageService.getProducts();
-  if (existingProducts.length === 0) {
-    INITIAL_PRODUCTS.forEach(product => {
-      storageService.saveProduct(product);
+function seedInitialData() {
+  const now = new Date();
+
+  INITIAL_PRODUCTS.forEach((product, index) => {
+    storageService.saveProduct(product);
+
+    const reportId = uuidv4();
+    storageService.saveReport({
+      id: reportId,
+      productId: product.id,
+      title: `Reporte ${product.name}`,
+      description: `Reporte de monitoreo de ${product.name}`,
+      reportDate: now.toISOString(),
+      createdAt: now.toISOString(),
     });
 
-    const now = new Date();
+    const conditions = [
+      EventCondition.CONDITION_ACTIVE,
+      EventCondition.CONDITION_ACTIVE,
+      EventCondition.CONDITION_ACTIVE,
+      EventCondition.CONDITION_WARNING,
+      EventCondition.CONDITION_ERROR,
+    ];
+    const condition = conditions[index % conditions.length];
 
-    INITIAL_PRODUCTS.forEach((product, index) => {
-      const reportId = uuidv4();
-      storageService.saveReport({
-        id: reportId,
-        productId: product.id,
-        title: `Reporte ${product.name}`,
-        description: `Reporte de monitoreo de ${product.name}`,
-        reportDate: now.toISOString(),
-        createdAt: now.toISOString(),
-      });
+    storageService.saveEvent({
+      id: uuidv4(),
+      reportId,
+      productId: product.id,
+      condition,
+      title: 'Estado actual',
+      description: `Últimas mediciones del sistema ${product.name}`,
+      occurredAt: now.toISOString(),
+      createdAt: now.toISOString(),
+    });
 
-      const conditions = [
-        EventCondition.CONDITION_ACTIVE,
-        EventCondition.CONDITION_ACTIVE,
-        EventCondition.CONDITION_ACTIVE,
-        EventCondition.CONDITION_WARNING,
-        EventCondition.CONDITION_ERROR,
-      ];
-
-      const condition = conditions[index % conditions.length];
-
+    if (index % 4 === 0) {
       storageService.saveEvent({
         id: uuidv4(),
         reportId,
         productId: product.id,
-        condition,
-        title: `Estado actual`,
-        description: `Últimas mediciones del sistema ${product.name}`,
-        occurredAt: now.toISOString(),
+        condition: EventCondition.CONDITION_ACTIVE,
+        title: 'Verificación rutinaria',
+        description: 'Control preventivo sin novedades.',
+        occurredAt: new Date(now.getTime() - 86400000).toISOString(),
         createdAt: now.toISOString(),
       });
-    });
+    }
+  });
+}
+
+export const seedDatabase = () => {
+  if (storageService.getProducts().length === 0) {
+    seedInitialData();
+    notifyStorageUpdate();
   }
+};
+
+export const resetDatabase = () => {
+  localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
+  localStorage.removeItem(STORAGE_KEYS.REPORTS);
+  localStorage.removeItem(STORAGE_KEYS.EVENTS);
+  seedInitialData();
+  notifyStorageUpdate();
 };

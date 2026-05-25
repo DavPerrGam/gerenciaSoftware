@@ -8,45 +8,48 @@ const statusConfig = {
   [EventCondition.CONDITION_ACTIVE]: {
     icon: Activity,
     label: 'Operativo',
-    description: 'Todas las unidades se encuentran dentro de los límites normales.',
-    ringColor: '#06a77d',
-    bgGradient: 'from-emerald-50/80 to-white',
-    borderAccent: 'border-l-status-active',
+    description:
+      'Los sistemas tecnológicos del Hospital San Rafael operan dentro de parámetros normales.',
+    ringColor: '#057a57',
+    bgGradient: 'from-emerald-50/90 to-white',
+    borderAccent: 'status-accent-active',
   },
   [EventCondition.CONDITION_WARNING]: {
     icon: AlertTriangle,
     label: 'Advertencia',
-    description: 'Hay alertas leves que requieren seguimiento puntual.',
-    ringColor: '#ff9f43',
-    bgGradient: 'from-amber-50/80 to-white',
-    borderAccent: 'border-l-status-warning',
+    description:
+      'Existen alertas en servicios que requieren seguimiento del equipo de tecnología hospitalaria.',
+    ringColor: '#c97a12',
+    bgGradient: 'from-amber-50/90 to-white',
+    borderAccent: 'status-accent-warning',
   },
   [EventCondition.CONDITION_ERROR]: {
     icon: AlertCircle,
     label: 'Incidencia crítica',
-    description: 'Se detectaron problemas importantes en servicios clave.',
-    ringColor: '#ee5a52',
-    bgGradient: 'from-red-50/80 to-white',
-    borderAccent: 'border-l-status-error',
+    description:
+      'Se reportan fallas en sistemas que pueden afectar la atención en el Hospital San Rafael.',
+    ringColor: '#b83832',
+    bgGradient: 'from-red-50/90 to-white',
+    borderAccent: 'status-accent-error',
   },
 };
 
 function UptimeRing({ uptime, color }: { uptime: number; color: string }) {
-  const radius = 52;
+  const radius = 48;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (uptime / 100) * circumference;
 
   return (
-    <div className="relative flex h-32 w-32 items-center justify-center">
-      <svg className="-rotate-90" width="128" height="128" viewBox="0 0 128 128">
-        <circle cx="64" cy="64" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="10" />
+    <div className="relative flex h-28 w-28 shrink-0 items-center justify-center">
+      <svg className="-rotate-90" width="112" height="112" viewBox="0 0 112 112">
+        <circle cx="56" cy="56" r={radius} fill="none" stroke="#e8eef4" strokeWidth="9" />
         <circle
-          cx="64"
-          cy="64"
+          cx="56"
+          cy="56"
           r={radius}
           fill="none"
           stroke={color}
-          strokeWidth="10"
+          strokeWidth="9"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
@@ -54,8 +57,10 @@ function UptimeRing({ uptime, color }: { uptime: number; color: string }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-display text-2xl font-bold text-slate-900">{uptime}%</span>
-        <span className="text-xs font-medium text-muted">uptime</span>
+        <span className="font-display text-xl font-bold text-brand-dark">{uptime}%</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+          Uptime
+        </span>
       </div>
     </div>
   );
@@ -69,28 +74,27 @@ export function GlobalStatus() {
 
   return (
     <div
-      id="estado"
-      className={`surface-card-strong border-l-4 bg-gradient-to-br p-8 ${config.borderAccent} ${config.bgGradient}`}
+      className={`surface-card-strong border-l-4 bg-gradient-to-br p-6 sm:p-8 ${config.borderAccent} ${config.bgGradient}`}
     >
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-        <div className="max-w-2xl">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.35em] text-brand">Estado general</p>
-          <h2 className="font-display text-3xl font-bold text-slate-950">
-            Disponibilidad del hospital
-          </h2>
-          <p className="mt-3 text-sm leading-7 text-muted">
-            {config.description} El panel centraliza la información crítica para decisión rápida.
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-bold uppercase tracking-[0.28em] text-brand">
+            Semáforo institucional
           </p>
-          <div className="mt-5">
-            <StatusBadge condition={globalStatus} size="lg" />
+          <h2 className="mt-2 font-display text-xl font-bold text-brand-dark sm:text-2xl">
+            Estado general del hospital
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted">{config.description}</p>
+          <div className="mt-4">
+            <StatusBadge condition={globalStatus} size="md" />
           </div>
         </div>
 
-        <div className="flex items-center gap-6 rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+        <div className="flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
           <UptimeRing uptime={uptime} color={config.ringColor} />
-          <div className="hidden sm:block">
+          <div>
             <div
-              className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${
+              className={`mb-2 flex h-11 w-11 items-center justify-center rounded-xl ${
                 globalStatus === EventCondition.CONDITION_ACTIVE
                   ? 'bg-emerald-50 text-status-active'
                   : globalStatus === EventCondition.CONDITION_WARNING
@@ -98,10 +102,10 @@ export function GlobalStatus() {
                     : 'bg-red-50 text-status-error'
               }`}
             >
-              <Icon size={28} />
+              <Icon size={22} />
             </div>
-            <p className="font-display text-xl font-bold text-slate-950">{config.label}</p>
-            <p className="mt-1 text-sm text-muted">Estado consolidado</p>
+            <p className="font-display text-lg font-bold text-brand-dark">{config.label}</p>
+            <p className="text-xs text-muted">Consolidado · Tunja</p>
           </div>
         </div>
       </div>
